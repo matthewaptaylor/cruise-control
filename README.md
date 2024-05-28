@@ -17,6 +17,7 @@ export PATH=$PATH:/opt/esterelv6_01/bin
 To compile and run the XES simulator, use the following commands:
 
 ```bash
-make src/cruiseControl.xes
-./src/cruiseControl.xes
+cd src
+make cruiseControl.xes
+./cruiseControl.xes
 ```

@@ -12,6 +12,37 @@ You need to compile the Esterel code to C code using the Esterel compiler. You c
 export PATH=$PATH:/opt/esterelv6_01/bin
 ```
 
+*edit*:
+
+```bash
+# PREREQUISTIES:
+esterel -version
+xes -version
+xeve -version
+
+# If they are not found, but installed you may need to symbo-link to /usr/bin
+# example:
+sudo ln -s /path_to/esterel_distro/bin/xeve /usr/local/bin/xeve
+# confirm link:
+ls -l /usr/local/bin/xeve
+```
+
+```bash
+# change line 31 of Makefile -- 
+export ESTEREL= /path_to/esterel_distro
+
+# if errors are thrown, you may need the following libraries:
+sudo apt update
+# gcc-multilib
+sudo apt install gcc-multilib
+# 32-bit lib
+sudo apt install libc6-dev-i386
+# 32-bit x11 devlopment lib
+sudo apt install libx11-dev:i386
+```
+
+
+
 ## Use the XES Simulator
 
 To compile and run the XES simulator, use the following commands:

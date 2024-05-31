@@ -6,13 +6,19 @@
 
 If using VSCode, we recommend installing the [C/C++](vscode:extension/ms-vscode.cpptools) and [Kieler](vscode:extension/kieler.keith-vscode) extensions for syntax highlighting, code formatting, and code visualisation.
 
+### Installing with FlexIT
+
 You need to compile the Esterel code to C code using the Esterel compiler. You can access this by opening Ubuntu via [FlexIT](http://flexit.auckland.ac.nz/), and making sure you have the preinstalled Esterel compiler in your PATH with the following command:
 
 ```bash
 export PATH=$PATH:/opt/esterelv6_01/bin
 ```
 
-*edit*:
+Note that if you try to compile from the VM's mounted virtual disk from your host machine (e.g. `tsclient`), you may encounter issues with the Esterel compiler. Instead, copy the files to the VM's local disk and compile from there.
+
+### Installing without FlexIT
+
+_edit_:
 
 ```bash
 # PREREQUISTIES:
@@ -28,7 +34,7 @@ ls -l /usr/local/bin/xeve
 ```
 
 ```bash
-# change line 31 of Makefile -- 
+# change line 31 of Makefile --
 export ESTEREL= /path_to/esterel_distro
 
 # if errors are thrown, you may need the following libraries:
@@ -40,8 +46,6 @@ sudo apt install libc6-dev-i386
 # 32-bit x11 devlopment lib
 sudo apt install libx11-dev:i386
 ```
-
-
 
 ## Use the XES Simulator
 

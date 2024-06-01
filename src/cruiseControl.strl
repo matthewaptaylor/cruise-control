@@ -98,7 +98,7 @@ module CarDrivingControl:
 			end if;
 				emit ThrottleCmd2(?Accel2);
 		end if;
-        
+
 		pause;
 	end loop
 	end var

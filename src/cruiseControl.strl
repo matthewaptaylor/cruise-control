@@ -1,46 +1,54 @@
-module cruiseControl:
-
-%Version 1 of producer consumer
-%Is it going to produce the correct count value?
-%declarations of data-handling functions in C
-procedure send()(integer);
-procedure recv1(string)();
-function outCount(): integer;
-
-%interface declarations
-input svalue := 1: integer;
-output message: string;
-output count: integer;
 
 
-[
-%consumer thread
-loop
-	var data: string in	
-		await tick;
-		emit message("waiting another tick");
-		await tick;		
-		pause;
-		call recv1(data)();
-		%data := "My message";
-		emit message(data);
+module CruiseSpeedManagement:
+
+end module
+
+module CarDrivingControl:
+	input cdcCruiseState: integer, cdcCruiseSpeed : float, cdcSpeed : float, cdcAccel : float;
+	output cdcThrottleCmd : float;
+
+	function regulateThrottle(integer, float, float) : float;
+
+	var regulate := false : boolean in
+
+	loop
+		present (cdcCruiseState) then
+			if (?cdcCruiseState = 2) then
+				regulate := true;
+			else
+				regulate := false;
+			end if
+		end present
+
+		if (regulate) then
+			if (?cdcCruiseState = 2 and pre(?cdcCruiseState) <> 2) then
+				emit ThrottleCmd(regulateThrottle(1, ?cdcCruiseSpeed, ?cdcSpeed));
+			else
+				emit ThrottleCmd(regulateThrottle(0, ?cdcCruiseSpeed, ?cdcSpeed));
+			end if
+				emit ThrottleCmd(?cdcAccel);
+		end if
+
+		pause
+	end loop
 	end var
-end loop
-]
-||
-[
-%thread emitting the current count value
-loop
-	pause;
-	emit count(outCount());
-end loop
-]
-||
-[
-%producer thread
-loop
-	await svalue;
-	call send()(?svalue);
-end loop
-]
+end module
+
+module cruiseController:
+	input On, Off, Resue, Set, QuickDecel, QuickAccel;
+	input Accel : float, Brake : float, Speed : float;
+	output CruiseSpeed : float, ThrottleCmd : float, CruiseState : integer;
+
+	// run cruiseStateFSM
+
+	// run cruiseSpeedManager
+
+	run CarDrivingControl[
+		signal CruiseState/cdcCruiseState;
+		signal CruiseSpeed/cdcCruiseSpeed;
+		signal Speed/cdcSpeed;
+		signal Accel/cdcAccel;
+		signal ThrottleCmd/cdcThrottleCmd;
+	];
 end module

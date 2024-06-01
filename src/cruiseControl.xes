@@ -1,4 +1,0 @@
-#!/bin/sh
-ESTEREL=/home/dareu/esterel
-export ESTEREL
-exec /home/dareu/esterel/bin/xes cruiseControl.exe

@@ -1,0 +1,61 @@
+% Module which manages the state of the cruise control system to follow the
+% behavioural requirements.
+module StateMachine:
+    % Constants defined in CruiseControl.h
+    constant SPEED_MIN : float, SPEED_MAX : float, SPEED_INC : float, PEDALS_MIN : float;
+    constant OFF : integer, ON : integer, STDBY : integer, DISABLE : integer; % In CruiseStates enum
+
+    % Interface variables
+    input On1, Off1, Resume1, Set1, QuickDecel1, QuickAccel1, Accel1 : float, Brake1: float, Speed1 : float;
+    output CruiseState1 : integer;
+
+    % Tick state machine
+    var state := OFF : integer in 
+        loop
+            emit CruiseState1(state);
+            pause;
+        end loop
+    end var
+end module
+
+% Module which regulates the throttle command.
+module DrivingControl:
+end module
+
+% Module which manages the cruise speed.
+module CruiseSpeedManagement:
+end module
+
+% Top level module for the cruise control system that runs three modules in
+% parallel.
+module CruiseControl:
+    % Interface variables
+    input On, Off, Resume, Set, QuickDecel, QuickAccel, Accel : float, Brake: float, Speed : float;
+    output CruiseSpeed : float, ThrottleCmd : float, CruiseState : integer;
+
+    % Run modules
+    signal state: integer in
+        loop
+            present state then
+                emit CruiseState(?state);
+            end present;
+            pause
+        end loop
+        ||
+        run StateMachine[ signal On/On1,
+                          signal Off/Off1,
+                          signal Resume/Resume1,
+                          signal Set/Set1,
+                          signal QuickDecel/QuickDecel1,
+                          signal QuickAccel/QuickAccel1,
+                          signal Accel/Accel1,
+                          signal Brake/Brake1,
+                          signal Speed/Speed1,
+                          signal CruiseState/CruiseState1,
+                          signal state/CruiseState1 ]
+        ||
+        run DrivingControl
+        ||
+        run CruiseSpeedManagement
+    end signal
+end module

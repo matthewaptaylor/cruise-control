@@ -73,7 +73,6 @@ module StateMachine:
     end var
 end module
 
-% Module which regulates the throttle command.
 module CarDrivingControl:
 	input CruiseState2: integer, CruiseSpeed2 : float, Speed2 : float, Accel2 : float;
 	output ThrottleCmd2 : float;
@@ -140,6 +139,7 @@ module CruiseControl:
             signal Accel/Accel2;
             signal ThrottleCmd/ThrottleCmd2;
 	    ];
+        %||
         %run CruiseSpeedManagement
     end signal
 end module

@@ -1,20 +1,90 @@
+% Module which manages the state of the cruise control system to follow the
+% behavioural requirements.
+module StateMachine:
+    % Constants defined in CruiseControl.h
+    constant SPEED_MIN : float, SPEED_MAX : float, PEDALS_MIN : float;
+    constant OFF : integer, ON : integer, STDBY : integer, DISABLE : integer; % In CruiseStates enum
 
+    % Interface variables
+    input On1, Off1, Resume1, Accel1 : float, Brake1: float, Speed1 : float;
+    output CruiseState1 : integer;
 
-module CruiseSpeedManagement:
+    var state := OFF : integer in
+        loop
+            % Emit current state
+            emit CruiseState1(state);
+            pause;
+            
+            % Calculate next state
+            trap TState in
+                if state = OFF then
+                    % Go on when the on button is pressed
+                    present On1 then
+                        state := ON;
+                        exit TState;
+                    end present;
+                elsif state = ON then
+                    % Go off when the off button is pressed
+                    present Off1 then
+                        state := OFF;
+                        exit TState;
+                    end present;
 
+                    % Go standby when the brake is pressed
+                    if ?Brake1 > PEDALS_MIN then
+                        state := STDBY;
+                    % Disable when accelerator pressed or outside of speed limits
+                    elsif ?Accel1 > PEDALS_MIN or ?Speed1 < SPEED_MIN or ?Speed1 > SPEED_MAX then
+                        state := DISABLE;
+                    end if;
+                elsif state = STDBY then
+                    % Go off when the off button is pressed
+                    present Off1 then
+                        state := OFF;
+                        exit TState;
+                    end present;
+
+                    % Exit standby when the resume button is pressed
+                    present Resume1 then
+                        % Disable when accelerator pressed or outside of speed limits, otherwise go on
+                        if ?Accel1 > PEDALS_MIN or ?Speed1 < SPEED_MIN or ?Speed1 > SPEED_MAX then
+                            state := DISABLE;
+                        else
+                            state := ON;
+                        end if;
+                    end present;
+                elsif state = DISABLE then
+                    % Go off when the off button is pressed
+                    present Off1 then
+                        state := OFF;
+                        exit TState;
+                    end present;
+
+                    % Go standby when the brake is pressed
+                    if ?Brake1 > PEDALS_MIN then
+                        state := STDBY;
+                    % Go on when accelerator not pressed and within speed limits
+                    elsif ?Accel1 <= PEDALS_MIN and ?Speed1 >= SPEED_MIN and ?Speed1 <= SPEED_MAX then
+                        state := ON;
+                    end if;
+                end if;
+            end trap
+        end loop
+    end var
 end module
 
+% Module which regulates the throttle command.
 module CarDrivingControl:
-	input cdcCruiseState: integer, cdcCruiseSpeed : float, cdcSpeed : float, cdcAccel : float;
-	output cdcThrottleCmd : float;
+	input CruiseState2: integer, CruiseSpeed2 : float, Speed2 : float, Accel2 : float;
+	output ThrottleCmd2 : float;
 
 	function regulateThrottle(integer, float, float) : float;
 
 	var regulate := false : boolean in
 
 	loop
-		present (cdcCruiseState) then
-			if (?cdcCruiseState = 2) then
+		present (CruiseState2) then
+			if (?CruiseState2 = 2) then
 				regulate := true;
 			else
 				regulate := false;
@@ -22,12 +92,12 @@ module CarDrivingControl:
 		end present
 
 		if (regulate) then
-			if (?cdcCruiseState = 2 and pre(?cdcCruiseState) <> 2) then
-				emit ThrottleCmd(regulateThrottle(1, ?cdcCruiseSpeed, ?cdcSpeed));
+			if (?CruiseState2 = 2 and pre(?CruiseState2) <> 2) then
+				emit ThrottleCmd2(regulateThrottle(1, ?CruiseSpeed2, ?Speed2));
 			else
-				emit ThrottleCmd(regulateThrottle(0, ?cdcCruiseSpeed, ?cdcSpeed));
+				emit ThrottleCmd2(regulateThrottle(0, ?CruiseSpeed2, ?Speed2));
 			end if
-				emit ThrottleCmd(?cdcAccel);
+				emit ThrottleCmd2(?Accel2);
 		end if
 
 		pause
@@ -35,20 +105,41 @@ module CarDrivingControl:
 	end var
 end module
 
-module cruiseController:
-	input On, Off, Resue, Set, QuickDecel, QuickAccel;
-	input Accel : float, Brake : float, Speed : float;
-	output CruiseSpeed : float, ThrottleCmd : float, CruiseState : integer;
+% Module which manages the cruise speed.
+%module CruiseSpeedManagement:
+%end module
 
-	// run cruiseStateFSM
+% Top level module for the cruise control system that runs three modules in
+% parallel.
+module CruiseControl:
+    % Interface variables
+    input On, Off, Resume, Set, QuickDecel, QuickAccel, Accel : float, Brake: float, Speed : float;
+    output CruiseSpeed : float, ThrottleCmd : float, CruiseState : integer;
 
-	// run cruiseSpeedManager
-
-	run CarDrivingControl[
-		signal CruiseState/cdcCruiseState;
-		signal CruiseSpeed/cdcCruiseSpeed;
-		signal Speed/cdcSpeed;
-		signal Accel/cdcAccel;
-		signal ThrottleCmd/cdcThrottleCmd;
-	];
+    % Run modules
+    signal state: integer in
+        loop
+            present state then
+                emit CruiseState(?state);
+            end present;
+            pause
+        end loop
+        ||
+        run StateMachine[ signal On/On1;
+                          signal Off/Off1;
+                          signal Resume/Resume1;
+                          signal Accel/Accel1;
+                          signal Brake/Brake1;
+                          signal Speed/Speed1;
+                          signal state/CruiseState1 ]
+        ||
+        run CarDrivingControl[
+            signal CruiseState/CruiseState2;
+            signal CruiseSpeed/CruiseSpeed2;
+            signal Speed/Speed2;
+            signal Accel/Accel2;
+            signal ThrottleCmd/ThrottleCmd2;
+	    ];
+        %run CruiseSpeedManagement
+    end signal
 end module

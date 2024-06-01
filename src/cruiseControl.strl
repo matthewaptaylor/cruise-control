@@ -74,16 +74,15 @@ module StateMachine:
 end module
 
 module CarDrivingControl:
-	input CruiseState2: integer, CruiseSpeed2 : float, Speed2 : float, Accel2 : float;
-	output ThrottleCmd2 : float;
+	input cdc_CruiseState : integer, cdc_CruiseSpeed : float, cdc_Speed : float, cdc_Accel : float;
+	output cdc_ThrottleCmd : float;
 
 	function regulateThrottle(integer, float, float) : float;
-
+	
 	var regulate := false : boolean in
-
 	loop
-		present (CruiseState2) then
-			if (?CruiseState2 = 2) then
+		present(cdc_CruiseState) then
+			if (?cdc_CruiseState = 2) then
 				regulate := true;
 			else
 				regulate := false;
@@ -91,12 +90,13 @@ module CarDrivingControl:
 		end present;
 
 		if regulate then
-			if (?CruiseState2 = 2 and pre(?CruiseState2) <> 2) then
-				emit ThrottleCmd2(regulateThrottle(1, ?CruiseSpeed2, ?Speed2));
-			else
-				emit ThrottleCmd2(regulateThrottle(0, ?CruiseSpeed2, ?Speed2));
+			if (?cdc_CruiseState = 1 and pre(?cdc_CruiseState) = 0) then
+				emit cdc_ThrottleCmd(regulateThrottle(1, ?cdc_CruiseSpeed, ?cdc_Speed));
+			else 
+				emit cdc_ThrottleCmd(regulateThrottle(0, ?cdc_CruiseSpeed, ?cdc_Speed));
 			end if;
-				emit ThrottleCmd2(?Accel2);
+		else
+			emit cdc_ThrottleCmd(?cdc_Accel);
 		end if;
 
 		pause;
@@ -219,11 +219,11 @@ module CruiseControl:
                           signal state/CruiseState1 ];
         ||
         run CarDrivingControl[
-            signal CruiseState/CruiseState2;
-            signal CruiseSpeed/CruiseSpeed2;
-            signal Speed/Speed2;
-            signal Accel/Accel2;
-            signal ThrottleCmd/ThrottleCmd2];
+            signal CruiseState/cdc_CruiseState;
+            signal CruiseSpeed/cdc_CruiseSpeed;
+            signal Speed/cdc_Speed;
+            signal Accel/cdc_Accel;
+            signal ThrottleCmd/cdc_ThrottleCmd];
         ||
         run CruiseSpeedManagement[ 	signal Set/cruiseManageSet;
 									signal Speed/cruiseManageSpeed;

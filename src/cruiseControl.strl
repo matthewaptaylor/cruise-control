@@ -111,7 +111,7 @@ module CruiseSpeedManagement:
 	input cruiseManageState : integer;
 	input cruiseManageSpeed : float;
 	
-	output cruiseManageCruiseSpeed;
+	output cruiseManageCruiseSpeed : float;
 	
 	% temporary speed variable
 	var temp_Speed := 0.0f : float in
@@ -186,7 +186,7 @@ module CruiseSpeedManagement:
 				if ?cruiseManageState = 1 then
 					temp_Speed := 0.0f;
 					exit cruiseManage_T;
-					
+		 			
 				end if;
 				
 			end trap;

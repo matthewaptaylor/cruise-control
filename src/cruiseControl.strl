@@ -105,8 +105,95 @@ module CarDrivingControl:
 end module
 
 % Module which manages the cruise speed.
-%module CruiseSpeedManagement:
-%end module
+module CruiseSpeedManagement:
+	constant SPEED_MIN : float, SPEED_MAX : float, SPEED_INC : float;
+	input cruiseManageSet, cruiseManageQuickAccel, cruiseManageQuickDecel;
+	input cruiseManageState : integer;
+	input cruiseManageSpeed : float;
+	
+	output cruiseManageCruiseSpeed;
+	
+	% temporary speed variable
+	var temp_Speed := 0.0f : float in
+		loop
+		
+			emit cruiseManageCruiseSpeed(temp_Speed);
+			pause;
+			
+			trap cruiseManage_T in
+				
+				%Cruise control turned on
+				if (pre(?cruiseManageState) = 1 and cruiseManageState = 2) then
+					if ?cruiseManageSpeed > SPEED_MAX then
+						temp_Speed := SPEED_MAX;
+						exit cruiseManage_T;
+						
+					elsif ?cruiseManageSpeed < SPEED_MIN then
+						temp_Speed := SPEED_MIN;
+						exit cruiseManage_T;
+						
+					else
+						temp_Speed := cruiseManageSpeed;
+						exit cruiseManage_T;
+						
+					end if;
+				end if;
+				
+				% Cruise control is on
+				present cruiseManageSet then
+					if ?cruiseManageSpeed > SPEED_MAX then
+						temp_Speed := SPEED_MAX;
+						exit cruiseManage_T;
+						
+					elsif ?cruiseManageSpeed < SPEED_MIN then
+						temp_Speed := SPEED_MIN;
+						exit cruiseManage_T;
+						
+					else
+						temp_Speed := cruiseManageSpeed;
+						exit cruiseManage_T;
+						
+					end if;
+				end present;
+				
+				% Quick acceleration
+				present pre(cruiseManageQuickAccel) then
+					if (temp_Speed > (SPEED_MAX - SPEED_INC)) then
+						 temp_Speed := SPEED_MAX;
+						 exit cruiseManage_T;
+						 
+					else
+						temp_Speed := temp_Speed + SPEED_INC;
+						exit cruiseManage_T;
+						
+					end if;
+				end present;
+				
+				%Quick Deceleration
+				present pre(cruiseManageQuickDecel) then
+					if (temp_Speed < (SPEED_MIN + SPEED_INC)) then
+						temp_Speed := SPEED_MIN;
+						exit cruiseManage_T;
+						
+					else
+						temp_Speed := temp_Speed - SPEED_INC;
+						exit cruiseManage_T;
+						
+					end if;
+				end present;
+				
+				%Cruise control is off
+				if ?cruiseManageState = 1 then
+					temp_Speed := 0.0f;
+					exit cruiseManage_T;
+					
+				end if;
+				
+			end trap;
+		end loop;
+	end var;
+						
+end module
 
 % Top level module for the cruise control system that runs three modules in
 % parallel.
@@ -138,8 +225,15 @@ module CruiseControl:
             signal Speed/Speed2;
             signal Accel/Accel2;
             signal ThrottleCmd/ThrottleCmd2;
-	    ];
-        %||
-        %run CruiseSpeedManagement
+	    ]
+        ||
+        run CruiseSpeedManagement[ 	signal Set/cruiseManageSet;
+									signal Speed/cruiseManageSpeed;
+									signal state/cruiseManageState;
+									signal QuickAccel/cruiseManageQuickAccel;
+									signal QuickDecel/cruiseManageQuickDecel;
+									signal CruiseSpeed/cruiseManageCruiseSpeed;
+		
+		];
     end signal
 end module

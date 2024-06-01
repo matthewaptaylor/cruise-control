@@ -74,12 +74,12 @@ module StateMachine:
 end module
 
 % Module which regulates the throttle command.
-module DrivingControl:
-end module
+%module DrivingControl:
+%end module
 
 % Module which manages the cruise speed.
-module CruiseSpeedManagement:
-end module
+%module CruiseSpeedManagement:
+%end module
 
 % Top level module for the cruise control system that runs three modules in
 % parallel.
@@ -103,11 +103,10 @@ module CruiseControl:
                           signal Accel/Accel1;
                           signal Brake/Brake1;
                           signal Speed/Speed1;
-                          signal CruiseState/CruiseState1;
                           signal state/CruiseState1 ]
-        ||
-        run DrivingControl
-        ||
-        run CruiseSpeedManagement
+        %||
+        %run DrivingControl
+        %||
+        %run CruiseSpeedManagement
     end signal
 end module

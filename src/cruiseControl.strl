@@ -123,7 +123,7 @@ module CruiseSpeedManagement:
 			trap cruiseManage_T in
 				
 				%Cruise control turned on
-				if (pre(?cruiseManageState) = 1 and cruiseManageState = 2) then
+				if (pre(?cruiseManageState) = 1 and ?cruiseManageState = 2) then
 					if ?cruiseManageSpeed > SPEED_MAX then
 						temp_Speed := SPEED_MAX;
 						exit cruiseManage_T;
@@ -133,9 +133,8 @@ module CruiseSpeedManagement:
 						exit cruiseManage_T;
 						
 					else
-						temp_Speed := cruiseManageSpeed;
+						temp_Speed := ?cruiseManageSpeed;
 						exit cruiseManage_T;
-						
 					end if;
 				end if;
 				
@@ -150,7 +149,7 @@ module CruiseSpeedManagement:
 						exit cruiseManage_T;
 						
 					else
-						temp_Speed := cruiseManageSpeed;
+						temp_Speed := ?cruiseManageSpeed;
 						exit cruiseManage_T;
 						
 					end if;
@@ -224,16 +223,13 @@ module CruiseControl:
             signal CruiseSpeed/CruiseSpeed2;
             signal Speed/Speed2;
             signal Accel/Accel2;
-            signal ThrottleCmd/ThrottleCmd2;
-	    ]
+            signal ThrottleCmd/ThrottleCmd2];
         ||
         run CruiseSpeedManagement[ 	signal Set/cruiseManageSet;
 									signal Speed/cruiseManageSpeed;
 									signal state/cruiseManageState;
 									signal QuickAccel/cruiseManageQuickAccel;
 									signal QuickDecel/cruiseManageQuickDecel;
-									signal CruiseSpeed/cruiseManageCruiseSpeed;
-		
-		];
+									signal CruiseSpeed/cruiseManageCruiseSpeed];
     end signal
 end module

@@ -87,19 +87,19 @@ module CarDrivingControl:
 				regulate := true;
 			else
 				regulate := false;
-			end if
-		end present
+			end if;
+		end present;
 
-		if (regulate) then
+		if regulate then
 			if (?CruiseState2 = 2 and pre(?CruiseState2) <> 2) then
 				emit ThrottleCmd2(regulateThrottle(1, ?CruiseSpeed2, ?Speed2));
 			else
 				emit ThrottleCmd2(regulateThrottle(0, ?CruiseSpeed2, ?Speed2));
-			end if
+			end if;
 				emit ThrottleCmd2(?Accel2);
-		end if
-
-		pause
+		end if;
+        
+		pause;
 	end loop
 	end var
 end module
@@ -130,15 +130,14 @@ module CruiseControl:
                           signal Accel/Accel1;
                           signal Brake/Brake1;
                           signal Speed/Speed1;
-                          signal state/CruiseState1 ]
+                          signal state/CruiseState1 ];
         ||
         run CarDrivingControl[
             signal CruiseState/CruiseState2;
             signal CruiseSpeed/CruiseSpeed2;
             signal Speed/Speed2;
             signal Accel/Accel2;
-            signal ThrottleCmd/ThrottleCmd2;
-	    ];
+            signal ThrottleCmd/ThrottleCmd2 ];
         %||
         %run CruiseSpeedManagement
     end signal

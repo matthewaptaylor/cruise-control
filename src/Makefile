@@ -28,7 +28,7 @@ ifeq ($(shell uname -p), x86_64)
   GCC32=-m32 
 endif
 
-export ESTEREL=/opt/esterelv6_01
+export ESTEREL=/home/dareu/esterel
 
 CC       = gcc
 CFLAGS   = $(GCC32) -Wall -L$(ESTEREL)/lib -I$(ESTEREL)/include

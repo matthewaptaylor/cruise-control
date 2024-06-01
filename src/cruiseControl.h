@@ -14,4 +14,4 @@
 #define DISABLE 3
 
 float saturateThrottle(float throttleIn, bool *saturate);
-float regulateThrottle(bool isGoingOn, float cruiseSpeed, float vehicleSpeed);
+float regulateThrottle(int isGoingOn, float cruiseSpeed, float vehicleSpeed);

@@ -73,9 +73,36 @@ module StateMachine:
     end var
 end module
 
-% Module which regulates the throttle command.
-%module DrivingControl:
-%end module
+module CarDrivingControl:
+	input CruiseState2: integer, CruiseSpeed2 : float, Speed2 : float, Accel2 : float;
+	output ThrottleCmd2 : float;
+
+	function regulateThrottle(integer, float, float) : float;
+
+	var regulate := false : boolean in
+
+	loop
+		present (CruiseState2) then
+			if (?CruiseState2 = 2) then
+				regulate := true;
+			else
+				regulate := false;
+			end if
+		end present
+
+		if (regulate) then
+			if (?CruiseState2 = 2 and pre(?CruiseState2) <> 2) then
+				emit ThrottleCmd2(regulateThrottle(1, ?CruiseSpeed2, ?Speed2));
+			else
+				emit ThrottleCmd2(regulateThrottle(0, ?CruiseSpeed2, ?Speed2));
+			end if
+				emit ThrottleCmd2(?Accel2);
+		end if
+
+		pause
+	end loop
+	end var
+end module
 
 % Module which manages the cruise speed.
 %module CruiseSpeedManagement:
@@ -104,8 +131,14 @@ module CruiseControl:
                           signal Brake/Brake1;
                           signal Speed/Speed1;
                           signal state/CruiseState1 ]
-        %||
-        %run DrivingControl
+        ||
+        run CarDrivingControl[
+            signal CruiseState/CruiseState2;
+            signal CruiseSpeed/CruiseSpeed2;
+            signal Speed/Speed2;
+            signal Accel/Accel2;
+            signal ThrottleCmd/ThrottleCmd2;
+	    ];
         %||
         %run CruiseSpeedManagement
     end signal

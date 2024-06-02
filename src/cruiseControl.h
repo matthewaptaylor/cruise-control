@@ -12,6 +12,3 @@
 #define ON 1
 #define STDBY 2
 #define DISABLE 3
-
-float saturateThrottle(float throttleIn, bool *saturate);
-float regulateThrottle(int isGoingOn, float cruiseSpeed, float vehicleSpeed);

@@ -75,7 +75,7 @@ end module
 
 module CarDrivingControl:
     % Functions declared in CruiseControl.h
-	function regulateThrottle(integer, float, float) : float;
+	function regulateThrottle(boolean, float, float) : float;
 
     % Interface variables
 	input cdc_CruiseState : integer, cdc_Accel : float, cdc_Speed : float, cdc_CruiseSpeed : float;
@@ -91,9 +91,9 @@ module CarDrivingControl:
 
 		if regulate then
 			if (?cdc_CruiseState = 1 and pre(?cdc_CruiseState) = 0) then
-				emit cdc_ThrottleCmd(regulateThrottle(1, ?cdc_CruiseSpeed, ?cdc_Speed));
+				emit cdc_ThrottleCmd(regulateThrottle(true, ?cdc_CruiseSpeed, ?cdc_Speed));
 			else 
-				emit cdc_ThrottleCmd(regulateThrottle(0, ?cdc_CruiseSpeed, ?cdc_Speed));
+				emit cdc_ThrottleCmd(regulateThrottle(false, ?cdc_CruiseSpeed, ?cdc_Speed));
 			end if;
 		else
 			emit cdc_ThrottleCmd(?cdc_Accel);

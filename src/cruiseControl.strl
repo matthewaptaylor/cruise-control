@@ -3,7 +3,7 @@
 module StateMachine:
     % Constants defined in CruiseControl.h
     constant SPEED_MIN : float, SPEED_MAX : float, PEDALS_MIN : float;
-    constant OFF : integer, ON : integer, STDBY : integer, DISABLE : integer; % In CruiseStates enum
+    constant OFF : integer, ON : integer, STDBY : integer, DISABLE : integer;
 
     % Interface variables
     input On1, Off1, Resume1, Accel1 : float, Brake1: float, Speed1 : float;
@@ -74,23 +74,19 @@ module StateMachine:
 end module
 
 module CarDrivingControl:
-    % Functions declared in CruiseControl.h
+    % Constants defined in CruiseControl.h
+    constant OFF : integer, ON : integer, STDBY : integer, DISABLE : integer;
+
+    % Functions defined in CruiseControl.c
 	function regulateThrottle(boolean, float, float) : float;
 
     % Interface variables
 	input cdc_CruiseState : integer, cdc_Accel : float, cdc_Speed : float, cdc_CruiseSpeed : float;
 	output cdc_ThrottleCmd : float;
 
-	var regulate := false : boolean in
 	loop
-		if (?cdc_CruiseState = 2) then
-			regulate := true;
-		else
-			regulate := false;
-		end if;
-
-		if regulate then
-			if (?cdc_CruiseState = 1 and pre(?cdc_CruiseState) = 0) then
+		if ?cdc_CruiseState = ON then
+			if (?cdc_CruiseState = ON and pre(?cdc_CruiseState) = OFF) then
 				emit cdc_ThrottleCmd(regulateThrottle(true, ?cdc_CruiseSpeed, ?cdc_Speed));
 			else 
 				emit cdc_ThrottleCmd(regulateThrottle(false, ?cdc_CruiseSpeed, ?cdc_Speed));
@@ -101,13 +97,13 @@ module CarDrivingControl:
 
 		pause;
 	end loop
-	end var
 end module
 
 % Module which manages the cruise speed.
 module CruiseSpeedManagement:
     % Constants defined in CruiseControl.h
 	constant SPEED_MIN : float, SPEED_MAX : float, SPEED_INC : float;
+    constant OFF : integer, ON : integer, STDBY : integer, DISABLE : integer;
 
 	% Interface variables
 	input cruiseManageSet, cruiseManageQuickDecel, cruiseManageQuickAccel, cruiseManageSpeed : float, cruiseManageState : integer;
@@ -121,7 +117,7 @@ module CruiseSpeedManagement:
 			
 			trap cruiseManage_T in
 				%Cruise control turned on
-				if (pre(?cruiseManageState) = 1 and ?cruiseManageState = 2) then
+				if (pre(?cruiseManageState) = ON and ?cruiseManageState = STDBY) then
 					if ?cruiseManageSpeed > SPEED_MAX then
 						temp_Speed := SPEED_MAX;
 						exit cruiseManage_T;
@@ -171,7 +167,7 @@ module CruiseSpeedManagement:
 				end present;
 				
 				%Cruise control is off
-				if ?cruiseManageState = 1 then
+				if ?cruiseManageState = ON then
 					temp_Speed := 0.0f;
 					exit cruiseManage_T;
 				end if;

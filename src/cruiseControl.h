@@ -8,7 +8,7 @@
 #define PEDALS_MIN 3.0  // Minimum throttle and brake pedal position to trigger a change, in percent
 
 // Cruise control states
-#define OFF 0
-#define ON 1
-#define STDBY 2
-#define DISABLE 3
+#define OFF 1
+#define ON 2
+#define STDBY 3
+#define DISABLE 4

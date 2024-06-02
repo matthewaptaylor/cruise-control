@@ -116,22 +116,18 @@ module CruiseSpeedManagement:
 	% temporary speed variable
 	var temp_Speed := 0.0f : float in
 		loop
-		
 			emit cruiseManageCruiseSpeed(temp_Speed);
 			pause;
 			
 			trap cruiseManage_T in
-				
 				%Cruise control turned on
 				if (pre(?cruiseManageState) = 1 and ?cruiseManageState = 2) then
 					if ?cruiseManageSpeed > SPEED_MAX then
 						temp_Speed := SPEED_MAX;
 						exit cruiseManage_T;
-						
 					elsif ?cruiseManageSpeed < SPEED_MIN then
 						temp_Speed := SPEED_MIN;
 						exit cruiseManage_T;
-						
 					else
 						temp_Speed := ?cruiseManageSpeed;
 						exit cruiseManage_T;
@@ -143,15 +139,12 @@ module CruiseSpeedManagement:
 					if ?cruiseManageSpeed > SPEED_MAX then
 						temp_Speed := SPEED_MAX;
 						exit cruiseManage_T;
-						
 					elsif ?cruiseManageSpeed < SPEED_MIN then
 						temp_Speed := SPEED_MIN;
 						exit cruiseManage_T;
-						
 					else
 						temp_Speed := ?cruiseManageSpeed;
 						exit cruiseManage_T;
-						
 					end if;
 				end present;
 				
@@ -160,11 +153,9 @@ module CruiseSpeedManagement:
 					if (temp_Speed > (SPEED_MAX - SPEED_INC)) then
 						 temp_Speed := SPEED_MAX;
 						 exit cruiseManage_T;
-						 
 					else
 						temp_Speed := temp_Speed + SPEED_INC;
 						exit cruiseManage_T;
-						
 					end if;
 				end present;
 				
@@ -173,11 +164,9 @@ module CruiseSpeedManagement:
 					if (temp_Speed < (SPEED_MIN + SPEED_INC)) then
 						temp_Speed := SPEED_MIN;
 						exit cruiseManage_T;
-						
 					else
 						temp_Speed := temp_Speed - SPEED_INC;
 						exit cruiseManage_T;
-						
 					end if;
 				end present;
 				
@@ -185,13 +174,10 @@ module CruiseSpeedManagement:
 				if ?cruiseManageState = 1 then
 					temp_Speed := 0.0f;
 					exit cruiseManage_T;
-		 			
 				end if;
-				
-			end trap;
-		end loop;
-	end var;
-						
+			end trap
+		end loop
+	end var
 end module
 
 % Top level module for the cruise control system that runs three modules in
@@ -210,26 +196,31 @@ module CruiseControl:
             pause
         end loop
         ||
-        run StateMachine[ signal On/On1;
-                          signal Off/Off1;
-                          signal Resume/Resume1;
-                          signal Accel/Accel1;
-                          signal Brake/Brake1;
-                          signal Speed/Speed1;
-                          signal state/CruiseState1 ];
+        run StateMachine[
+			signal On/On1;
+			signal Off/Off1;
+			signal Resume/Resume1;
+			signal Accel/Accel1;
+			signal Brake/Brake1;
+			signal Speed/Speed1;
+			signal state/CruiseState1
+			]
         ||
         run CarDrivingControl[
-            signal CruiseState/cdc_CruiseState;
+            signal state/cdc_CruiseState;
             signal CruiseSpeed/cdc_CruiseSpeed;
             signal Speed/cdc_Speed;
             signal Accel/cdc_Accel;
-            signal ThrottleCmd/cdc_ThrottleCmd];
+            signal ThrottleCmd/cdc_ThrottleCmd
+		]
         ||
-        run CruiseSpeedManagement[ 	signal Set/cruiseManageSet;
-									signal Speed/cruiseManageSpeed;
-									signal state/cruiseManageState;
-									signal QuickAccel/cruiseManageQuickAccel;
-									signal QuickDecel/cruiseManageQuickDecel;
-									signal CruiseSpeed/cruiseManageCruiseSpeed];
+        run CruiseSpeedManagement[
+			signal Set/cruiseManageSet;
+			signal Speed/cruiseManageSpeed;
+			signal state/cruiseManageState;
+			signal QuickAccel/cruiseManageQuickAccel;
+			signal QuickDecel/cruiseManageQuickDecel;
+			signal CruiseSpeed/cruiseManageCruiseSpeed
+		]
     end signal
 end module

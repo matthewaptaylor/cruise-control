@@ -86,11 +86,7 @@ module CarDrivingControl:
 
 	loop
 		if ?CruiseState1 = ON then
-			if (?CruiseState1 = ON and pre(?CruiseState1) = OFF) then
-				emit ThrottleCmd1(regulateThrottle(true, ?CruiseSpeed1, ?Speed1));
-			else 
-				emit ThrottleCmd1(regulateThrottle(false, ?CruiseSpeed1, ?Speed1));
-			end if;
+			emit ThrottleCmd1(regulateThrottle(?CruiseState1 = ON and pre(?CruiseState1) <> ON, ?CruiseSpeed1, ?Speed1));
 		else
 			emit ThrottleCmd1(?Accel1);
 		end if;
@@ -106,7 +102,7 @@ module CruiseSpeedManagement:
     constant OFF : integer, ON : integer, STDBY : integer, DISABLE : integer;
 
 	% Interface variables
-	input On1, Set1, QuickDecel1, QuickAccel1, Speed1 : float, CruiseState1 : integer;
+	input Set1, QuickDecel1, QuickAccel1, Speed1 : float, CruiseState1 : integer;
 	output CruiseSpeed1 : float;
 	
 	% temporary speed variable
@@ -117,19 +113,17 @@ module CruiseSpeedManagement:
 			
 			trap cruiseManage_T in
 				% Set cruising speed when on button is pressed for the first time
-				present On1 then
-					if ?CruiseState1 = ON and temp_Speed = 0.0f then
-						temp_Speed := ?Speed1;
+				if ?CruiseState1 = ON and pre(?CruiseState1) = OFF then
+					temp_Speed := ?Speed1;
 
-						% Limit speed to maximum and minimum speed
-						if (temp_Speed > SPEED_MAX) then
-							temp_Speed := SPEED_MAX;
-						elsif (temp_Speed < SPEED_MIN) then
-							temp_Speed := SPEED_MIN;
-						end if;
-						exit cruiseManage_T;
+					% Limit speed to maximum and minimum speed
+					if temp_Speed > SPEED_MAX then
+						temp_Speed := SPEED_MAX;
+					elsif temp_Speed < SPEED_MIN then
+						temp_Speed := SPEED_MIN;
 					end if;
-				end present;
+					exit cruiseManage_T;
+				end if;
 				
 				% Stop managing cruise speed when cruise control is off
 				if ?CruiseState1 = OFF then
@@ -142,9 +136,9 @@ module CruiseSpeedManagement:
 					temp_Speed := ?Speed1;
 
 					% Limit speed to maximum and minimum speed
-					if (temp_Speed > SPEED_MAX) then
+					if temp_Speed > SPEED_MAX then
 						temp_Speed := SPEED_MAX;
-					elsif (temp_Speed < SPEED_MIN) then
+					elsif temp_Speed < SPEED_MIN then
 						temp_Speed := SPEED_MIN;
 					end if;
 					exit cruiseManage_T;
@@ -155,7 +149,7 @@ module CruiseSpeedManagement:
 					temp_Speed := temp_Speed + SPEED_INC;
 
 					% Limit speed to maximum speed
-					if (temp_Speed > SPEED_MAX) then
+					if temp_Speed > SPEED_MAX then
 						temp_Speed := SPEED_MAX;
 					end if;
 					exit cruiseManage_T;
@@ -166,7 +160,7 @@ module CruiseSpeedManagement:
 					temp_Speed := temp_Speed - SPEED_INC;
 
 					% Limit speed to minimum speed
-					if (temp_Speed < SPEED_MIN) then
+					if temp_Speed < SPEED_MIN then
 						temp_Speed := SPEED_MIN;
 					end if;
 					exit cruiseManage_T;
@@ -210,7 +204,6 @@ module CruiseControl:
 		]
         ||
         run CruiseSpeedManagement[
-			signal On/On1;
 			signal Set/Set1;
 			signal QuickDecel/QuickDecel1;
 			signal QuickAccel/QuickAccel1;

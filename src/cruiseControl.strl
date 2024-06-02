@@ -81,18 +81,18 @@ module CarDrivingControl:
 	function regulateThrottle(boolean, float, float) : float;
 
     % Interface variables
-	input cdc_CruiseState : integer, cdc_Accel : float, cdc_Speed : float, cdc_CruiseSpeed : float;
-	output cdc_ThrottleCmd : float;
+	input CruiseState1 : integer, Accel1 : float, Speed1 : float, CruiseSpeed1 : float;
+	output ThrottleCmd1 : float;
 
 	loop
-		if ?cdc_CruiseState = ON then
-			if (?cdc_CruiseState = ON and pre(?cdc_CruiseState) = OFF) then
-				emit cdc_ThrottleCmd(regulateThrottle(true, ?cdc_CruiseSpeed, ?cdc_Speed));
+		if ?CruiseState1 = ON then
+			if (?CruiseState1 = ON and pre(?CruiseState1) = OFF) then
+				emit ThrottleCmd1(regulateThrottle(true, ?CruiseSpeed1, ?Speed1));
 			else 
-				emit cdc_ThrottleCmd(regulateThrottle(false, ?cdc_CruiseSpeed, ?cdc_Speed));
+				emit ThrottleCmd1(regulateThrottle(false, ?CruiseSpeed1, ?Speed1));
 			end if;
 		else
-			emit cdc_ThrottleCmd(?cdc_Accel);
+			emit ThrottleCmd1(?Accel1);
 		end if;
 
 		pause;
@@ -106,46 +106,46 @@ module CruiseSpeedManagement:
     constant OFF : integer, ON : integer, STDBY : integer, DISABLE : integer;
 
 	% Interface variables
-	input cruiseManageSet, cruiseManageQuickDecel, cruiseManageQuickAccel, cruiseManageSpeed : float, cruiseManageState : integer;
-	output cruiseManageCruiseSpeed : float;
+	input Set1, QuickDecel1, QuickAccel1, Speed1 : float, CruiseState1 : integer;
+	output CruiseSpeed1 : float;
 	
 	% temporary speed variable
 	var temp_Speed := 0.0f : float in
 		loop
-			emit cruiseManageCruiseSpeed(temp_Speed);
+			emit CruiseSpeed1(temp_Speed);
 			pause;
 			
 			trap cruiseManage_T in
 				%Cruise control turned on
-				if (pre(?cruiseManageState) = ON and ?cruiseManageState = STDBY) then
-					if ?cruiseManageSpeed > SPEED_MAX then
+				if (pre(?CruiseState1) = ON and ?CruiseState1 = STDBY) then
+					if ?Speed1 > SPEED_MAX then
 						temp_Speed := SPEED_MAX;
 						exit cruiseManage_T;
-					elsif ?cruiseManageSpeed < SPEED_MIN then
+					elsif ?Speed1 < SPEED_MIN then
 						temp_Speed := SPEED_MIN;
 						exit cruiseManage_T;
 					else
-						temp_Speed := ?cruiseManageSpeed;
+						temp_Speed := ?Speed1;
 						exit cruiseManage_T;
 					end if;
 				end if;
 				
 				% Cruise control is on
-				present cruiseManageSet then
-					if ?cruiseManageSpeed > SPEED_MAX then
+				present Set1 then
+					if ?Speed1 > SPEED_MAX then
 						temp_Speed := SPEED_MAX;
 						exit cruiseManage_T;
-					elsif ?cruiseManageSpeed < SPEED_MIN then
+					elsif ?Speed1 < SPEED_MIN then
 						temp_Speed := SPEED_MIN;
 						exit cruiseManage_T;
 					else
-						temp_Speed := ?cruiseManageSpeed;
+						temp_Speed := ?Speed1;
 						exit cruiseManage_T;
 					end if;
 				end present;
 				
 				% Quick acceleration
-				present pre(cruiseManageQuickAccel) then
+				present pre(QuickAccel1) then
 					if (temp_Speed > (SPEED_MAX - SPEED_INC)) then
 						 temp_Speed := SPEED_MAX;
 						 exit cruiseManage_T;
@@ -156,7 +156,7 @@ module CruiseSpeedManagement:
 				end present;
 				
 				%Quick Deceleration
-				present pre(cruiseManageQuickDecel) then
+				present pre(QuickDecel1) then
 					if (temp_Speed < (SPEED_MIN + SPEED_INC)) then
 						temp_Speed := SPEED_MIN;
 						exit cruiseManage_T;
@@ -167,7 +167,7 @@ module CruiseSpeedManagement:
 				end present;
 				
 				%Cruise control is off
-				if ?cruiseManageState = ON then
+				if ?CruiseState1 = ON then
 					temp_Speed := 0.0f;
 					exit cruiseManage_T;
 				end if;
@@ -202,20 +202,20 @@ module CruiseControl:
 		]
         ||
         run CarDrivingControl[
-            signal state/cdc_CruiseState;
-            signal Accel/cdc_Accel;
-            signal Speed/cdc_Speed;
-            signal CruiseSpeed/cdc_CruiseSpeed;
-            signal ThrottleCmd/cdc_ThrottleCmd
+            signal state/CruiseState1;
+            signal Accel/Accel1;
+            signal Speed/Speed1;
+            signal CruiseSpeed/CruiseSpeed1;
+            signal ThrottleCmd/ThrottleCmd1
 		]
         ||
         run CruiseSpeedManagement[
-			signal Set/cruiseManageSet;
-			signal QuickDecel/cruiseManageQuickDecel;
-			signal QuickAccel/cruiseManageQuickAccel;
-			signal Speed/cruiseManageSpeed;
-			signal state/cruiseManageState;
-			signal CruiseSpeed/cruiseManageCruiseSpeed
+			signal Set/Set1;
+			signal QuickDecel/QuickDecel1;
+			signal QuickAccel/QuickAccel1;
+			signal Speed/Speed1;
+			signal state/CruiseState1;
+			signal CruiseSpeed/CruiseSpeed1
 		]
     end signal
 end module

@@ -1,0 +1,60 @@
+Accel="0" Brake="0" Speed="0" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("0.000000") CruiseState("1")
+%
+Accel="0.000000" Brake="0.000000" Speed="0.000000" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("0.000000") CruiseState("1")
+%
+Accel="51.234" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("51.234001") CruiseState("1")
+%
+Accel="51.234001" Speed="2.0937" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("51.234001") CruiseState("1")
+%
+Speed="4.1862" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("51.234001") CruiseState("1")
+%
+Speed="6.2772" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("51.234001") CruiseState("1")
+%
+Speed="8.3661" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("51.234001") CruiseState("1")
+%
+Accel="89.687" Speed="10.453" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("89.686996") CruiseState("1")
+%
+Speed="13.051" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("89.686996") CruiseState("1")
+%
+Speed="15.644" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("89.686996") CruiseState("1")
+%
+Speed="18.233" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("89.686996") CruiseState("1")
+%
+Speed="20.816" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("89.686996") CruiseState("1")
+%
+Speed="23.393" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("89.686996") CruiseState("1")
+%
+Speed="25.962" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("89.686996") CruiseState("1")
+%
+Speed="28.524" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("89.686996") CruiseState("1")
+%
+Speed="31.078" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("89.686996") CruiseState("1")
+%
+Speed="33.623" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("89.686996") CruiseState("1")
+%
+Accel="0" Speed="36.158" ;
+% Outputs: CruiseSpeed("0.000000") ThrottleCmd("0.000000") CruiseState("1")
+%
+On Speed="36.049" ;
+% Outputs: CruiseSpeed("36.049000") ThrottleCmd("0.000000") CruiseState("2")
+%
+Speed="35.94" ;
+% Outputs: CruiseSpeed("36.049000") ThrottleCmd("0.938827") CruiseState("2")
+%

@@ -74,20 +74,20 @@ module StateMachine:
 end module
 
 module CarDrivingControl:
-	input cdc_CruiseState : integer, cdc_CruiseSpeed : float, cdc_Speed : float, cdc_Accel : float;
+    % Functions declared in CruiseControl.h
+	function regulateThrottle(integer, float, float) : float;
+
+    % Interface variables
+	input cdc_CruiseState : integer, cdc_Accel : float, cdc_Speed : float, cdc_CruiseSpeed : float;
 	output cdc_ThrottleCmd : float;
 
-	function regulateThrottle(integer, float, float) : float;
-	
 	var regulate := false : boolean in
 	loop
-		present(cdc_CruiseState) then
-			if (?cdc_CruiseState = 2) then
-				regulate := true;
-			else
-				regulate := false;
-			end if;
-		end present;
+		if (?cdc_CruiseState = 2) then
+			regulate := true;
+		else
+			regulate := false;
+		end if;
 
 		if regulate then
 			if (?cdc_CruiseState = 1 and pre(?cdc_CruiseState) = 0) then
@@ -106,11 +106,11 @@ end module
 
 % Module which manages the cruise speed.
 module CruiseSpeedManagement:
+    % Constants defined in CruiseControl.h
 	constant SPEED_MIN : float, SPEED_MAX : float, SPEED_INC : float;
-	input cruiseManageSet, cruiseManageQuickAccel, cruiseManageQuickDecel;
-	input cruiseManageState : integer;
-	input cruiseManageSpeed : float;
-	
+
+	% Interface variables
+	input cruiseManageSet, cruiseManageQuickDecel, cruiseManageQuickAccel, cruiseManageSpeed : float, cruiseManageState : integer;
 	output cruiseManageCruiseSpeed : float;
 	
 	% temporary speed variable
@@ -184,15 +184,14 @@ end module
 % parallel.
 module CruiseControl:
     % Interface variables
-    input On, Off, Resume, Set, QuickDecel, QuickAccel, Accel : float, Brake: float, Speed : float;
+    input On, Off, Resume, Set, QuickDecel, QuickAccel;
+	input Accel := 0.0f : float, Brake := 0.0f: float, Speed := 0.0f : float;
     output CruiseSpeed : float, ThrottleCmd : float, CruiseState : integer;
 
     % Run modules
-    signal state: integer in
+    signal state : integer in
         loop
-            present state then
-                emit CruiseState(?state);
-            end present;
+			emit CruiseState(?state);
             pause
         end loop
         ||
@@ -204,22 +203,22 @@ module CruiseControl:
 			signal Brake/Brake1;
 			signal Speed/Speed1;
 			signal state/CruiseState1
-			]
+		]
         ||
         run CarDrivingControl[
             signal state/cdc_CruiseState;
-            signal CruiseSpeed/cdc_CruiseSpeed;
-            signal Speed/cdc_Speed;
             signal Accel/cdc_Accel;
+            signal Speed/cdc_Speed;
+            signal CruiseSpeed/cdc_CruiseSpeed;
             signal ThrottleCmd/cdc_ThrottleCmd
 		]
         ||
         run CruiseSpeedManagement[
 			signal Set/cruiseManageSet;
+			signal QuickDecel/cruiseManageQuickDecel;
+			signal QuickAccel/cruiseManageQuickAccel;
 			signal Speed/cruiseManageSpeed;
 			signal state/cruiseManageState;
-			signal QuickAccel/cruiseManageQuickAccel;
-			signal QuickDecel/cruiseManageQuickDecel;
 			signal CruiseSpeed/cruiseManageCruiseSpeed
 		]
     end signal
